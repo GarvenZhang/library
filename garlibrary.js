@@ -730,6 +730,11 @@
 
     /**
      * browser detect:
+     * @return <Object>{
+     *      engine:engine,
+            browser:browser,
+            system:system
+     * }
      */
     gar.browserDetect=function (fn) {
         //default data

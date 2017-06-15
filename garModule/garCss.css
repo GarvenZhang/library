@@ -366,6 +366,65 @@
     margin-right:40px;
 }*/
 
+/*================================================ gar-formSelection ======================================================*/
+/*.content article.fr>h2{
+    font: 800 18px/2 '';
+    text-align: center;
+    border-bottom:5px #C8925C solid;
+    margin-bottom: 10px;
+}
+.gar-formSelection{
+    margin:0 5px;
+    color: rgb(125, 125, 125);
+}
+.gar-formSelection li {
+    font:800 1.2em/1.5 '';
+    list-style: decimal inside;
+    padding:10px 0;
+}
+.gar-formSelection li:nth-of-type(2n-1){
+    background: rgba(244,243,239,.4);
+}
+.gar-formSelection label:first-child:not(.gar-labelTxtA){
+    display: inline-block;
+    width:40%;
+    font-weight:800;
+}
+.gar-formSelection input{
+    border:1px solid rgba(125,125,125,.5);
+}
+.gar-formSelection input:focus,.gar-formSelection select:focus,.gar-formSelection p:focus{
+    border:1px solid rgb(125,125,125);
+    box-shadow: 0 0 2px 0 rgba(125,125,125,.3);
+}
+.gar-formSelection p:focus{
+    outline:none;
+}
+.gar-formSelection select,.gar-formSelection p{
+    border:1px solid rgba(125,125,125,.5);
+}
+.gar-formSelection select{
+    color: rgb(125, 125, 125);
+}
+.gar-labelTxtA{
+    font-weight:800;
+}
+.gar-labelTxtA~p{
+    width:92%;
+    min-height:6em;
+    margin:5px 4% 0;
+}
+.gar-formSelection>input{
+    margin:10px 0 0 10px;
+    background: #F4F3EF;
+}
+.gar-formSelection [type='radio']{
+    margin:0;
+}
+.gar-formSelection [type='checkbox'],.gar-formSelection [type='checkbox']+label,
+.gar-formSelection [type='radio'],.gar-formSelection [type='radio']+label{
+    vertical-align: middle;
+}*/
 
 
 
