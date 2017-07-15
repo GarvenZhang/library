@@ -35,14 +35,14 @@
             }
         };
         //open
-        xhr.open(obj.method,obj.url,obj.sync||true);
+        xhr.open(obj.method, obj.url, !/false/.test(obj.sync) || true);
         //set Header
         if(obj.setHeaders){
-            var headers=obj.setHeaders;
-            for(var name in headers)xhr.setRequestHeader(name,headers[name]);
+            var headers = obj.setHeaders;
+            for(var name in headers) xhr.setRequestHeader(name, headers[name]);
         }
         //send data
-        xhr.send(JSON.stringify(obj.data)||null);
+        xhr.send( JSON.stringify(obj.data) || null);
     };
 
     gar.addURLParam=function (url, name, val) {
@@ -51,8 +51,39 @@
         return url;
     };
 
-    gar.serialize=function (formEle) {
-
+    gar.serialize=function (form) {
+        var formEle = form.elements; eparts = [], field = null, i, len, j, optLen, option, optValue;
+        for(i = 0, len = formEle.length; i < len; ++i){
+            field = formEle[i];
+            switch(field.type){
+                case 'select-one':
+                case 'select-multiple':
+                    if(field.name.length){
+                        for(j = 0, optLen = field.options.length; j < optLen; ++j){
+                            option = field.options[j];
+                            if(option.selected){
+                                optValue = '';
+                                if(option.hasAttribute) optValue = option.hasAttribute('value') ? option.value :option.text;
+                                else optValue = option.attributes['value'].specified ? option.value : option.text;
+                                parts.push(encodeURIComponent(field.name) + '=' + encodeURIComponent(optValue));
+                            }
+                        }
+                    }
+                    break;
+                case undefined:
+                case 'file':
+                case 'submit':
+                case 'reset':
+                case 'button':
+                    break;
+                case 'radio':
+                case 'checkbox':
+                    if(!field.checked) break;
+                default:
+                    if(field.name.length) parts.push( encodeURIComponent(field.name) + '=' + encodeURIComponent(field.value) );
+            }
+        }
+        return parts.join('&');
     };
 
     gar.sumbitData=function (method, url, asynchronous, fn, formEle) {
@@ -183,10 +214,10 @@
      * 3.breakEach:
      */
     gar.each=function (obj, callback) {
-        if(obj && obj.nodeType || obj[0] &&　obj[0].nodeType) obj=[].slice.call(obj);
+        if(gar.isType(obj, 'nodelist')) obj=[].slice.call(obj);
         var val,i=-1,o,isArr=obj instanceof Array,l=obj.length;
         if(isArr)for(;o=obj[++i];)val=callback.call(o,i,o,l);
-        else for(o in obj)val=callback.call(obj[o],o,obj[o],l,++i);
+        else for(o in obj)val=callback.call(obj[o], ++i, obj[o], l, o);
         return obj;
     };
     gar.reverseEach=function (arr, callback) {
@@ -620,6 +651,19 @@
         subType.prototype=_pro;
     };
 
+    /**
+     * form script:
+     */
+    gar.getSelectionTxt=function (txtbox) {
+        if(typeof (txtbox.selectionStart) == 'number')this.getSelectionTxt = function (txtbox) {
+            return txtbox.value.substring(txtbox.selectionStart,txtbox.selectionEnd);
+        };
+        else if(document.selection)this.getSelectionTxt = function (txtbox) {
+            return document.selection.createRange().text;
+        };
+        return this.getSelectionTxt(txtbox);
+    };
+
     /* ===================================================== change native javascript object ============================================================================ */
     Function.fn=Function.prototype;
     /**
@@ -947,21 +991,38 @@
         maxLen:function (val,len,errorMsg) {
             if(val.length>len)return errorMsg;
         },
+        onlyLen: function (val, len, errorMsg) {
+              if(val.length != len) return errorMsg;
+        },
+        limitedNum: function (val, len, errorMsg) {
+            var min = len.split('-')[0], max = len.split('-')[1], val = val[0] === '0' ? val.substring(1) : val;
+            if(! (parseFloat(val) <= parseFloat(max) && parseFloat(val) >= parseFloat(min) ) ) return errorMsg;
+        },
         isMobile:function (val, errorMsg) {
-            if(!/^1[3|4|5|8][0-9]{9}$/.test(val))return errorMsg;
+            if(!/^1(3|4|5|8)[0-9]{9}$/.test(val))return errorMsg;
+        },
+        isMail:function (val, errorMsg) {
+            if(!/^\w+([-+.']\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$/.test(val)) return errorMsg;
         },
         onlyNum:function (val, errorMsg) {
-            if(/^\d+$/.test(val))return errorMsg;
+            if(!/^\d+$/.test(val))return errorMsg;
         },
-        illegalInp:function (val,errorMsg) {    //   ~!@#$%^&*(
-            if(/[~!@#$%^&*()]+/i.test(val))return errorMsg;
+        illegalInp:function (val,errorMsg) {    //   ~!@#$%^&*();<>/' --
+            if(/([~!@#$%^&*();<>/']+|(--)+)/i.test(val))return errorMsg;
         },
-        confirmPwd:function (oldVal, newVal, errorMsg) {
+        confirmPwd:function (newVal, oldVal, errorMsg) {
             if(/md5-/.test(newVal)){
                 oldVal=md5(oldVal);
                 newVal=newVal.slice(4);
             }
-            if(oldVal!==newVal)return errorMsg;
+            if(oldVal !== newVal)return errorMsg;
+        },
+        singleSelect: function (value, errorMsg) {
+            /*for(var arr = Array.prototype.slice.call(dom, 0), l = arr.length, i = 0; l--; ){
+                if(arr[l].checked) ++i;
+            }
+            if(i !== 1) return errorMsg;*/
+            if(!value) return errorMsg;
         }
     };
 
@@ -1355,8 +1416,7 @@
 
     /**
      * Set:
-     */
-    gar.Set=function () {
+     */    gar.Set=function () {
         this.dataStore=[];
     };
     gar.Set.prototype={
@@ -1517,7 +1577,7 @@
         }
     };
 
-//for count:
+    //for count:
     gar.BSTNode4C=function (data,left,right) {
         gar.BSTNode.apply(this,arguments);
         this.count=1;
@@ -1708,52 +1768,4 @@
     gar.component={};
 
 })(window);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
